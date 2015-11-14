@@ -10,10 +10,14 @@ chrome.runtime.onInstalled.addListener(function() {
 function createNewLogFromUrl(url)
 {
     var re = /^(\S+:\/\/\/?)?([\da-z.\-_]+)\/?/i;
-
+	/*
+	plus complet, à tester
+	sépare le subdomain et le domaine
+	var re = /^(\S+:\/\/\/?)?([\da-z\-_]+\.)?([\da-z\-_]+\.[\da-z.\-_]+)\/?/i;
+	*/
     url = re.exec(url);
     if (url[1].indexOf("http") == -1 || url[1] == undefined)
-        var host = url[1] + url[2] + "\n(" + url + ")";
+        var host = url[1] + url[2];
     else
         var host = url[2];
 
@@ -64,7 +68,7 @@ function endLog()
 lastFocusedWindow: la dernière fenetre ayant eu le focus
 currentWindow: la fenetre executant un script actuellement, pas forcement celle en premier plan
 ***/
-function checkActiveTab()
+function getActiveTab()
 {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, function(tab) {
         if (tab[0])

@@ -20,3 +20,9 @@ thead {
     color: white;
     background: blue;
 }
+
+#totalTime {
+	font-size: 1.2em;
+	padding: 6px;
+	font-weight: bold;
+}

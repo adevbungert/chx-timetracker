@@ -76,6 +76,8 @@ finalCount.forEach(function(site) {
     var tdSite = document.createElement("td");
     var tdTime = document.createElement("td");
     var tdPercent = document.createElement("td");
+	
+	document.querySelector("#totalTime").innerHTML = convertTimeFromMillisecond(totalTime);
 
     tdSite.innerHTML = site[0];
     tdTime.innerHTML = convertTimeFromMillisecond(site[1]);
