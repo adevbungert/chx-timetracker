@@ -1,0 +1,22 @@
+body {
+    width: 400px;
+    height: 400px;
+    text-align: center;
+}
+
+table {
+    text-align: center;
+    width: 95%;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+td {
+    width: 33%;
+    border: 1px solid black;
+}
+
+thead {
+    color: white;
+    background: blue;
+}

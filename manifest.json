@@ -1,0 +1,27 @@
+{
+    "manifest_version": 2,
+    "name": "TurnOff",
+    "description": "Monitor your time spent browsing the internet and reduce distractions",
+    "version": "0.1",
+    "author": "David Tedgui",
+    "background": {
+        "scripts": ["scripts/monitor.js"]
+    },
+    "browser_action": {
+        "default_icon": "images/icon.png",
+        "default_title": "Stop procrastinating",
+        "default_popup": "main.html"
+    },
+    "options_page": "options.html",
+    "permissions": [
+        "<all_urls>",
+        "tabs",
+        "activeTab",
+        "unlimitedStorage",
+        "history",
+        "webNavigation",
+        "idle",
+        "alarms"
+    ],
+    "homepage_url": "http://www.dt.com"
+}
