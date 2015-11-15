@@ -6,14 +6,21 @@ body {
 
 table {
     text-align: center;
-    width: 95%;
+    width: 99%;
     border: 1px solid black;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 td {
     width: 33%;
+    max-width: 140px;
     border: 1px solid black;
+    word-wrap: break-word;
+}
+
+#currentSite {
+    background-color: red;
 }
 
 thead {

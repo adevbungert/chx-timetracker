@@ -10,11 +10,8 @@ chrome.runtime.onInstalled.addListener(function() {
 function createNewLogFromUrl(url)
 {
     var re = /^(\S+:\/\/\/?)?([\da-z.\-_]+)\/?/i;
-	/*
-	plus complet, à tester
-	sépare le subdomain et le domaine
-	var re = /^(\S+:\/\/\/?)?([\da-z\-_]+\.)?([\da-z\-_]+\.[\da-z.\-_]+)\/?/i;
-	*/
+	//var re = /^(\S+:\/\/\/?)?([\da-z\-_]+\.)?([\da-z\-_]+\.?[\da-z.\-_]+)\/?/i;
+
     url = re.exec(url);
     if (url[1].indexOf("http") == -1 || url[1] == undefined)
         var host = url[1] + url[2];
@@ -26,14 +23,6 @@ function createNewLogFromUrl(url)
         timestamp_start: Date.now()
     };
     localStorage.current_log = JSON.stringify(newLog);
-}
-
-function createNewLog()
-{
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tab) {
-        if (tab.length == 1)
-            createNewLogFromUrl(tab[0].url);
-    });
 }
 
 function endLog()
@@ -64,19 +53,29 @@ function endLog()
     }
 }
 
+/*function createNewLog()
+{
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, function(tab) {
+        if (tab.length == 1)
+            createNewLogFromUrl(tab[0].url);
+    });
+}*/
+
 /***
 lastFocusedWindow: la dernière fenetre ayant eu le focus
 currentWindow: la fenetre executant un script actuellement, pas forcement celle en premier plan
 ***/
-function getActiveTab()
+function createNewLog()
 {
+    endLog();
+
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, function(tab) {
         if (tab[0])
         {
             // permet de voir si l'utilisateur est sorti de Chrome
             chrome.windows.get(tab[0].windowId, function(win) {
                 if (win.focused)
-                    return (tab.url);
+                    createNewLogFromUrl(tab[0].url);
                 else
                     return (null);
             });
@@ -89,7 +88,7 @@ function getActiveTab()
 chrome.alarms.create("updateTab", { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name == "updateTab")
-        checkActiveTab();
+        getActiveTab();
 });
 
 
@@ -99,15 +98,11 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
 //nouvelle URL chargée
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == "complete" && tab.active == true)
-    {
-        endLog();
         createNewLog();
-    }
 });
 
 // nouvelle tab ou changement de tab
 chrome.tabs.onActivated.addListener(function() {
-    endLog();
     createNewLog();
 });
 
@@ -115,10 +110,7 @@ chrome.windows.onFocusChanged.addListener(function(winId) {
     if (winId == chrome.windows.WINDOW_ID_NONE)
         endLog();
     else
-    {
-        endLog();
         createNewLog();
-    }
     console.log("onFocusChanged");
 });
 
@@ -152,7 +144,6 @@ chrome.tabs.onReplaced.addListener(function(newId, OldId) {
 
 // onglet fermé
 chrome.tabs.onRemoved.addListener(function(tabId, tabInfo) {
-    endLog();
     createNewLog();
 });
 

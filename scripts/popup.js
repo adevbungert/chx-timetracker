@@ -1,6 +1,7 @@
 document.querySelector("input[type=button]").addEventListener("click", function() {
     localStorage.current_log = "";
     localStorage.ended_logs = "{}";
+    localStorage.resetTime = Date.now();
 });
 
 
@@ -70,14 +71,15 @@ for (var i in logs)
 
 finalCount = sortArrayByTime(finalCount);
 
+document.querySelector("#lastResetTime").innerHTML = "(last: " + Date(localStorage.resetTime) + ")";
+document.querySelector("#totalTime").innerHTML = convertTimeFromMillisecond(totalTime);
+
 var table = document.querySelector("tbody");
 finalCount.forEach(function(site) {
     var tr = document.createElement("tr");
     var tdSite = document.createElement("td");
     var tdTime = document.createElement("td");
     var tdPercent = document.createElement("td");
-	
-	document.querySelector("#totalTime").innerHTML = convertTimeFromMillisecond(totalTime);
 
     tdSite.innerHTML = site[0];
     tdTime.innerHTML = convertTimeFromMillisecond(site[1]);
@@ -86,5 +88,8 @@ finalCount.forEach(function(site) {
     tr.appendChild(tdSite);
     tr.appendChild(tdTime);
     tr.appendChild(tdPercent);
+    var current = JSON.parse(localStorage.current_log);
+    if (current.host == site[0])
+        tr.setAttribute("id", "currentSite");
     table.appendChild(tr);
 });
