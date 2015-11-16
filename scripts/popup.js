@@ -1,8 +1,9 @@
 document.querySelector("input[type=button]").addEventListener("click", function() {
-    localStorage.current_log = "";
-    localStorage.ended_logs = "{}";
+    localStorage.logs = "{}";
     localStorage.resetTime = Date.now();
 });
+var resetTime = new Date(parseInt(localStorage.resetTime));
+document.querySelector("#lastResetTime").innerHTML = "(last: " +  resetTime + ")";
 
 
 function sortArrayByTime(tableau)
@@ -25,7 +26,7 @@ function sortArrayByTime(tableau)
 
 function convertTimeFromMillisecond(time)
 {
-    var seconds = Math.round(time / 1000);
+    var seconds = Math.ceil(time / 1000);
     var minutes = Math.floor(seconds / 60);
     var hours = Math.floor(minutes / 60);
     var days = Math.floor(hours / 24);
@@ -55,41 +56,42 @@ function convertTimeFromMillisecond(time)
     return (result);
 }
 
-var logs = JSON.parse(localStorage.ended_logs);
-var finalCount = [];
-var totalTime = 0;
+(function() {
+    var logs = JSON.parse(localStorage.logs);
+    var finalCount = [];
+    var totalTime = 0;
 
-for (var i in logs)
-{
-    var time = 0;
-    logs[i].forEach(function(log) {
-        time += log.timestamp_end - log.timestamp_start;
-        totalTime += log.timestamp_end - log.timestamp_start;
+    for (var i in logs)
+    {
+        var time = 0;
+        logs[i].forEach(function(log) {
+            time += log.timestamp_end - log.timestamp_start;
+            totalTime += log.timestamp_end - log.timestamp_start;
+        });
+        finalCount.push([i, time]);
+    }
+
+    finalCount = sortArrayByTime(finalCount);
+
+    document.querySelector("#totalTime").innerHTML = convertTimeFromMillisecond(totalTime);
+
+
+    var table = document.querySelector("tbody");
+
+    finalCount.forEach(function(site) {
+        var tr = document.createElement("tr");
+        var tdSite = document.createElement("td");
+        var tdTime = document.createElement("td");
+        var tdPercent = document.createElement("td");
+
+        tdSite.innerHTML = site[0];
+        tdTime.innerHTML = convertTimeFromMillisecond(site[1]);
+        tdPercent.innerHTML = Math.round((site[1] / totalTime) * 100) + " %";
+
+        tr.appendChild(tdSite);
+        tr.appendChild(tdTime);
+        tr.appendChild(tdPercent);
+
+        table.appendChild(tr);
     });
-    finalCount.push([i, time]);
-}
-
-finalCount = sortArrayByTime(finalCount);
-
-document.querySelector("#lastResetTime").innerHTML = "(last: " + Date(localStorage.resetTime) + ")";
-document.querySelector("#totalTime").innerHTML = convertTimeFromMillisecond(totalTime);
-
-var table = document.querySelector("tbody");
-finalCount.forEach(function(site) {
-    var tr = document.createElement("tr");
-    var tdSite = document.createElement("td");
-    var tdTime = document.createElement("td");
-    var tdPercent = document.createElement("td");
-
-    tdSite.innerHTML = site[0];
-    tdTime.innerHTML = convertTimeFromMillisecond(site[1]);
-    tdPercent.innerHTML = Math.round((site[1] / totalTime) * 100) + " %";
-
-    tr.appendChild(tdSite);
-    tr.appendChild(tdTime);
-    tr.appendChild(tdPercent);
-    var current = JSON.parse(localStorage.current_log);
-    if (current.host == site[0])
-        tr.setAttribute("id", "currentSite");
-    table.appendChild(tr);
-});
+})();

@@ -1,11 +1,13 @@
  // initialisation de localStorage
 chrome.runtime.onInstalled.addListener(function() {
-    localStorage.current_log = "";
-
-    if (!localStorage.ended_logs)
-        localStorage.ended_logs = "{}";
+    if (!localStorage.logs)
+        localStorage.logs = "{}";
 });
 
+var currentLog = {
+    host: "",
+    timestamp_start: 0
+};
 
 function createNewLogFromUrl(url)
 {
@@ -18,58 +20,66 @@ function createNewLogFromUrl(url)
     else
         var host = url[2];
 
-    var newLog = {
-        host: host,
-        timestamp_start: Date.now()
-    };
-    localStorage.current_log = JSON.stringify(newLog);
+    if (currentLog.host == "")
+    {
+        currentLog.host = host;
+        currentLog.timestamp_start = Date.now();
+    }
+    else
+    {
+        if (currentLog.host != host)
+        {
+            endLog();
+            currentLog.host = host;
+            currentLog.timestamp_start = Date.now();
+        }
+    }
 }
 
 function endLog()
 {
-    if (localStorage.current_log != "")
+    if (currentLog.host != "")
     {
-        var currentLog = JSON.parse(localStorage.current_log);
-        var endedLogs = JSON.parse(localStorage.ended_logs);
+        //var currentLog = JSON.parse(localStorage.current_log);
+        var allLogs = JSON.parse(localStorage.logs);
 
         var newLog = {
             timestamp_start: currentLog.timestamp_start,
             timestamp_end: Date.now()
         };
 
-        if (localStorage.ended_logs.indexOf(currentLog.host) != -1)
+        if (localStorage.logs.indexOf(currentLog.host) != -1)
         {
-            for (var i in endedLogs)
+            for (var i in allLogs)
             {
                 if (i == currentLog.host)
-                    endedLogs[i].push(newLog);
+                    allLogs[i].push(newLog);
             }
         }
         else
-            endedLogs[currentLog.host] = [newLog];
+            allLogs[currentLog.host] = [newLog];
 
-        localStorage.current_log = "";
-        localStorage.ended_logs = JSON.stringify(endedLogs);
+        currentLog.host = "";
+        currentLog.timestamp_start = 0;
+        localStorage.logs = JSON.stringify(allLogs);
     }
 }
 
 function createNewLog()
 {
-    endLog();
-
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, function(tab) {
-        if (tab[0])
+        if (tab.length == 1)
         {
             // permet de voir si l'utilisateur est sorti de Chrome
             chrome.windows.get(tab[0].windowId, function(win) {
                 if (win.focused)
                     createNewLogFromUrl(tab[0].url);
                 else
-                    return (null);
+                    endLog();
             });
         }
         else
-            return  (null);
+            endLog();
     });
 }
 
@@ -79,8 +89,9 @@ function createNewLog()
 chrome.alarms.create("updateTab", { periodInMinutes: 1 });
 /*chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name == "updateTab")
-        getActiveTab();
-});*/
+        createNewLog();
+});
+*/
 
 
 //nouvelle URL chargée
@@ -97,18 +108,12 @@ chrome.tabs.onActivated.addListener(function() {
 
 
 chrome.windows.onFocusChanged.addListener(function(winId) {
-    if (winId == chrome.windows.WINDOW_ID_NONE)
+    if (winId == -1) //chrome.windows.WINDOW_ID_NONE
         endLog();
     else
         createNewLog();
 });
 
-
-
-
-chrome.idle.queryState(60, function(newState) {
-    console.log(newState);
-});
 
 chrome.idle.onStateChanged.addListener(function(newState) {
     if (newState == "active")
@@ -117,11 +122,6 @@ chrome.idle.onStateChanged.addListener(function(newState) {
         endLog();
 });
 
-
-//vérifier si l'ID n'a pas été changé en cours de navigation à cause du PRERENDERING
-chrome.tabs.onReplaced.addListener(function(newId, OldId) {
-    console.log("onReplaced TRIGGERED");
-})
 
 // onglet fermé
 chrome.tabs.onRemoved.addListener(function(tabId, tabInfo) {
