@@ -5,7 +5,6 @@ document.querySelector("input[type=button]").addEventListener("click", function(
 var resetTime = new Date(parseInt(localStorage.resetTime));
 document.querySelector("#lastResetTime").innerHTML = "(last: " +  resetTime + ")";
 
-
 function sortArrayByTime(tableau)
 {
     var i = 1;

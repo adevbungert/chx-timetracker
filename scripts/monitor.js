@@ -84,15 +84,11 @@ function createNewLog()
 }
 
 
-
-
 chrome.alarms.create("updateTab", { periodInMinutes: 1 });
-/*chrome.alarms.onAlarm.addListener(function(alarm) {
+chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name == "updateTab")
         createNewLog();
 });
-*/
-
 
 //nouvelle URL chargée
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -100,12 +96,10 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         createNewLog();
 });
 
-
 // nouvelle tab ou changement de tab
 chrome.tabs.onActivated.addListener(function() {
     createNewLog();
 });
-
 
 chrome.windows.onFocusChanged.addListener(function(winId) {
     if (winId == -1) //chrome.windows.WINDOW_ID_NONE
@@ -114,14 +108,12 @@ chrome.windows.onFocusChanged.addListener(function(winId) {
         createNewLog();
 });
 
-
 chrome.idle.onStateChanged.addListener(function(newState) {
     if (newState == "active")
         createNewLog();
     else
         endLog();
 });
-
 
 // onglet fermé
 chrome.tabs.onRemoved.addListener(function(tabId, tabInfo) {
